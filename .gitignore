@@ -1,0 +1,620 @@
+# ============================================================
+
+# REACT AI AGENT - GITIGNORE
+
+# FastAPI + LangChain + LRU + Upstash + RAG + PostgreSQL
+
+# ============================================================
+
+# ------------------------------------------------------------
+
+# ENVIRONMENT VARIABLES / SECRETS
+
+# ------------------------------------------------------------
+
+.env
+.env.*
+!.env.example
+!.env.template
+
+# API keys / credentials
+
+*.pem
+*.key
+*.crt
+credentials.json
+service-account.json
+google-credentials.json
+
+# ------------------------------------------------------------
+
+# PYTHON
+
+# ------------------------------------------------------------
+
+**pycache**/
+*.py[cod]
+*$py.class
+
+*.so
+*.pyd
+
+# Python virtual environments
+
+.venv/
+venv/
+env/
+ENV/
+env.bak/
+venv.bak/
+
+# Python packaging
+
+build/
+dist/
+*.egg-info/
+.eggs/
+
+# Wheel / source distributions
+
+*.whl
+*.tar.gz
+
+# ------------------------------------------------------------
+
+# PYTEST / COVERAGE
+
+# ------------------------------------------------------------
+
+.pytest_cache/
+.coverage
+.coverage.*
+htmlcov/
+coverage.xml
+*.cover
+
+# ------------------------------------------------------------
+
+# TYPE CHECKING / LINTING
+
+# ------------------------------------------------------------
+
+.mypy_cache/
+.pyre/
+.pytype/
+.ruff_cache/
+
+# ------------------------------------------------------------
+
+# JUPYTER
+
+# ------------------------------------------------------------
+
+.ipynb_checkpoints/
+*.ipynb_checkpoints
+
+# ------------------------------------------------------------
+
+# IDE - VS CODE
+
+# ------------------------------------------------------------
+
+.vscode/
+!.vscode/extensions.json
+!.vscode/settings.example.json
+
+# ------------------------------------------------------------
+
+# IDE - PYCHARM / JETBRAINS
+
+# ------------------------------------------------------------
+
+.idea/
+*.iml
+*.ipr
+*.iws
+
+# ------------------------------------------------------------
+
+# WINDOWS
+
+# ------------------------------------------------------------
+
+Thumbs.db
+Thumbs.db:encryptable
+ehthumbs.db
+ehthumbs_vista.db
+*.stackdump
+
+# Windows installer/log files
+
+*.msi
+*.msix
+*.cab
+
+# ------------------------------------------------------------
+
+# MACOS
+
+# ------------------------------------------------------------
+
+.DS_Store
+.AppleDouble
+.LSOverride
+
+# ------------------------------------------------------------
+
+# LINUX
+
+# ------------------------------------------------------------
+
+*~
+.directory
+
+# ------------------------------------------------------------
+
+# LOGS
+
+# ------------------------------------------------------------
+
+*.log
+logs/
+log/
+*.log.*
+
+# Application logs
+
+app.log
+agent.log
+worker.log
+uvicorn.log
+
+# ------------------------------------------------------------
+
+# DATABASE
+
+# ------------------------------------------------------------
+
+*.db
+*.sqlite
+*.sqlite3
+
+# SQLite temporary files
+
+*.db-shm
+*.db-wal
+*.db-journal
+
+# Local PostgreSQL dumps
+
+*.dump
+*.sql.gz
+
+# ------------------------------------------------------------
+
+# CACHE
+
+# ------------------------------------------------------------
+
+# Python cache
+
+.cache/
+.cache_data/
+
+# Application cache
+
+cache/
+tmp/
+temp/
+
+# Local LRU / Redis cache
+
+lru_cache/
+redis_cache/
+
+# ------------------------------------------------------------
+
+# RAG / VECTOR DATABASE
+
+# ------------------------------------------------------------
+
+# Local vector stores
+
+chroma/
+chromadb/
+.faiss/
+faiss_index/
+vectorstore/
+vector_store/
+
+# Local embeddings
+
+embeddings/
+embedding_cache/
+
+# RAG temporary files
+
+rag_cache/
+rag_tmp/
+
+# ------------------------------------------------------------
+
+# UPLOADS / DOCUMENTS
+
+# ------------------------------------------------------------
+
+# User uploaded files
+
+uploads/
+uploaded_files/
+
+# Processed documents
+
+processed_documents/
+documents_processed/
+
+# OCR temporary output
+
+ocr/
+ocr_tmp/
+
+# Extracted text
+
+extracted_text/
+
+# Do NOT commit potentially sensitive documents
+
+private_documents/
+confidential/
+sensitive_data/
+
+# ------------------------------------------------------------
+
+# GENERATED FILES
+
+# ------------------------------------------------------------
+
+generated/
+output/
+outputs/
+reports/
+artifacts/
+
+# Generated agent responses
+
+agent_outputs/
+
+# ------------------------------------------------------------
+
+# FRONTEND
+
+# ------------------------------------------------------------
+
+# Node dependencies (if frontend tooling is added)
+
+node_modules/
+
+# npm
+
+.npm/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# Frontend builds
+
+dist/
+build/
+.next/
+.nuxt/
+.svelte-kit/
+
+# Vite
+
+.vite/
+
+# ------------------------------------------------------------
+
+# TAILWIND / FRONTEND TEMP
+
+# ------------------------------------------------------------
+
+.parcel-cache/
+.cache/
+
+# ------------------------------------------------------------
+
+# DOCKER
+
+# ------------------------------------------------------------
+
+# Local Docker volumes
+
+docker-data/
+docker/volumes/
+
+# Docker logs
+
+docker/logs/
+
+# ------------------------------------------------------------
+
+# CELERY / WORKERS
+
+# ------------------------------------------------------------
+
+celerybeat.pid
+celerybeat-schedule
+celerybeat-schedule.db
+
+# ------------------------------------------------------------
+
+# RABBITMQ
+
+# ------------------------------------------------------------
+
+rabbitmq-data/
+rabbitmq-logs/
+
+# ------------------------------------------------------------
+
+# QSTASH / LOCAL QUEUE
+
+# ------------------------------------------------------------
+
+queue/
+dead-letter/
+dlq/
+
+# ------------------------------------------------------------
+
+# AI / LLM
+
+# ------------------------------------------------------------
+
+# Local model files
+
+models/
+model_cache/
+llm_cache/
+
+# HuggingFace cache
+
+.cache/huggingface/
+huggingface_cache/
+
+# Ollama local data
+
+.ollama/
+
+# LangChain local cache
+
+.langchain/
+langchain_cache/
+
+# ------------------------------------------------------------
+
+# AGENT MEMORY
+
+# ------------------------------------------------------------
+
+# Local conversation memory
+
+memory/
+agent_memory/
+conversation_memory/
+
+# Do not commit user/session state
+
+sessions/
+session_data/
+
+# ------------------------------------------------------------
+
+# OBSERVABILITY
+
+# ------------------------------------------------------------
+
+traces/
+telemetry/
+metrics/
+profiler/
+debug/
+
+# ------------------------------------------------------------
+
+# SECURITY / AUDIT DATA
+
+# ------------------------------------------------------------
+
+# Local audit exports
+
+audit_exports/
+
+# Security reports generated locally
+
+security_reports/
+
+# ------------------------------------------------------------
+
+# API TESTING
+
+# ------------------------------------------------------------
+
+# Postman local environment files
+
+postman/*.local.json
+
+# Insomnia
+
+.insomnia/
+
+# ------------------------------------------------------------
+
+# HTTP CLIENTS
+
+# ------------------------------------------------------------
+
+.http/
+
+# ------------------------------------------------------------
+
+# UV / PIP / POETRY
+
+# ------------------------------------------------------------
+
+# uv
+
+.uv/
+
+# pip
+
+pip-wheel-metadata/
+
+# Poetry
+
+poetry.lock.backup
+
+# ------------------------------------------------------------
+
+# RUFF / BLACK / ISORT
+
+# ------------------------------------------------------------
+
+.ruff_cache/
+.black/
+.isort_cache/
+
+# ------------------------------------------------------------
+
+# SECRET SCANNERS
+
+# ------------------------------------------------------------
+
+.gitleaks/
+.trufflehog/
+
+# ------------------------------------------------------------
+
+# LOCAL CONFIGURATION
+
+# ------------------------------------------------------------
+
+config.local.*
+settings.local.*
+*.local.yaml
+*.local.yml
+*.local.json
+
+# ------------------------------------------------------------
+
+# BACKUPS
+
+# ------------------------------------------------------------
+
+*.bak
+*.backup
+*.old
+*.orig
+*.tmp
+*.swp
+*.swo
+
+# ------------------------------------------------------------
+
+# GENERATED DOCUMENTATION
+
+# ------------------------------------------------------------
+
+docs/_build/
+site/
+mkdocs_build/
+
+# ------------------------------------------------------------
+
+# OPENAPI GENERATED FILES
+
+# ------------------------------------------------------------
+
+openapi-generated/
+generated-openapi/
+
+# ------------------------------------------------------------
+
+# TEST ARTIFACTS
+
+# ------------------------------------------------------------
+
+test-results/
+test-output/
+playwright-report/
+.pytest_cache/
+
+# ------------------------------------------------------------
+
+# CI/CD LOCAL FILES
+
+# ------------------------------------------------------------
+
+.github/local/
+.github/secrets/
+
+# ------------------------------------------------------------
+
+# OS / EDITOR TEMP FILES
+
+# ------------------------------------------------------------
+
+*.tmp
+*.temp
+*.swp
+*.swo
+*.swn
+
+# ------------------------------------------------------------
+
+# PROJECT-SPECIFIC
+
+# ------------------------------------------------------------
+
+# Local development
+
+.local/
+.local-data/
+
+# Agent execution state
+
+agent_runs/
+agent_state/
+
+# Tool execution results
+
+tool_results/
+
+# Web search cache
+
+web_search_cache/
+
+# Search engine temporary files
+
+search_cache/
+
+# Citation cache
+
+citation_cache/
+
+# ------------------------------------------------------------
+
+# KEEP THESE FILES TRACKED
+
+# ------------------------------------------------------------
+
+!.gitkeep
+!.env.example
+!.env.template
+!README.md
+!docs/
+!tests/
+!app/
+!frontend/
