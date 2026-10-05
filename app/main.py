@@ -37,7 +37,6 @@ try:
     from app.api.routes_health import router as health_router
 except ImportError:
     health_router = None
-=======
 
 """
 app/main.py
@@ -86,7 +85,7 @@ app = FastAPI(
     description="""
     **Flujo:** Usuario → FastAPI → ANALYZER (10) → PROCESSOR (7 + tri) → RESPONSE (5) → USER (WS/Frontend)
     **WebSocket:** WS /ws/langchain cada 2s + GET /api/langchain/status
-=======
+
 
 # ============================================================
 # DIRECTORIOS
@@ -188,7 +187,7 @@ app = FastAPI(
 )
 
 
-=======
+
 
 # ============================================================
 # CORS
@@ -212,7 +211,7 @@ if health_router:
 if langchain_router:
     app.include_router(langchain_router)
     logger.info("✓ langchain_router en /ws/langchain y /api/langchain/status")
-=======
+
 
 # ============================================================
 # API ROUTERS
@@ -240,7 +239,7 @@ if analyzer_router:
     logger.info("✓ analyzer_router en /api/v1/analyzer")
 
 
-=======
+
 
 
 if llm_router:
@@ -248,7 +247,7 @@ if llm_router:
     logger.info("✓ llm_router en /api/v1/llm")
 
 
-=======
+
 
 if chats_router:
     app.include_router(chats_router)
@@ -426,7 +425,7 @@ async def on_startup():
 @app.on_event("shutdown")
 async def on_shutdown():
     logger.info("🛑 Backend detenido")
-=======
+
 
 # ------------------------------------------------------------
 # AGENT

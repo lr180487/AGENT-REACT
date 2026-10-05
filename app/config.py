@@ -1,5 +1,5 @@
-<<<<<<< HEAD
-=======
+
+
 
 """
 app/config.py
@@ -21,12 +21,11 @@ Incluye:
 - Uploads
 """
 
->>>>>>> ebbf022 (feat: complete Agent ReAct architecture)
+
 from __future__ import annotations
 
 from pathlib import Path
 from typing import Optional
-<<<<<<< HEAD
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -82,15 +81,12 @@ class Settings(BaseSettings):
 
 
 settings = Settings()
-=======
+
 from urllib.parse import parse_qsl, urlencode, urlsplit, urlunsplit
 
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
-# ============================================================
-# DIRECTORIOS
-# ============================================================
 
 APP_DIR = Path(__file__).resolve().parent
 
@@ -155,9 +151,6 @@ def normalize_redis_url(
     )
 
 
-# ============================================================
-# SETTINGS
-# ============================================================
 
 class Settings(BaseSettings):
 
@@ -374,16 +367,9 @@ class Settings(BaseSettings):
     )
 
 
-# ============================================================
-# CREATE SETTINGS
-# ============================================================
-
 settings = Settings()
 
 
-# ============================================================
-# UPSTASH RESOLUTION
-# ============================================================
 
 def resolve_redis_url() -> Optional[str]:
     """
@@ -451,34 +437,21 @@ def resolve_redis_url() -> Optional[str]:
     return None
 
 
-# ============================================================
-# RESOLVER REDIS PRINCIPAL
-# ============================================================
-
 REDIS_URL = resolve_redis_url()
 
 
-# ============================================================
-# CELERY BROKER
-# ============================================================
 
 CELERY_BROKER_URL = normalize_redis_url(
     settings.CELERY_BROKER_URL
 ) if settings.CELERY_BROKER_URL else REDIS_URL
 
 
-# ============================================================
-# CELERY RESULT BACKEND
-# ============================================================
 
 CELERY_RESULT_BACKEND = normalize_redis_url(
     settings.CELERY_RESULT_BACKEND
 ) if settings.CELERY_RESULT_BACKEND else REDIS_URL
 
 
-# ============================================================
-# EXPORTAR CONFIGURACIÓN
-# ============================================================
 
 settings.REDIS_URL = REDIS_URL
 
@@ -487,9 +460,6 @@ settings.CELERY_BROKER_URL = CELERY_BROKER_URL
 settings.CELERY_RESULT_BACKEND = CELERY_RESULT_BACKEND
 
 
-# ============================================================
-# HELPERS
-# ============================================================
 
 def is_upstash_enabled() -> bool:
     """
@@ -537,4 +507,3 @@ def get_celery_backend_url() -> Optional[str]:
     """
 
     return settings.CELERY_RESULT_BACKEND
->>>>>>> ebbf022 (feat: complete Agent ReAct architecture)

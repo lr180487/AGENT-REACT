@@ -1,6 +1,5 @@
 """
 routes_health.py
-============================================================
 
 Endpoints de salud del sistema.
 
