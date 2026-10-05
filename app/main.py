@@ -1,4 +1,4 @@
-<<<<<<< HEAD
+
 """
 main.py — Backend ANALYZER → PROCESSOR → RESPONSE (corregido para frontend)
 Sincronizado con interfaz.html / nuevo-chat.html — corrige 404 en /llm-config.js, /script.js, /favicon.*
@@ -74,12 +74,12 @@ from app.db.database import init_db
 # ============================================================
 # LOGGING
 # ============================================================
->>>>>>> ebbf022 (feat: complete Agent ReAct architecture)
+
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
-<<<<<<< HEAD
+
 # --- App ---
 app = FastAPI(
     title="Backend ANALYZER → PROCESSOR → RESPONSE",
@@ -181,21 +181,20 @@ app = FastAPI(
 
     LangChain:
     /api/langchain/status
->>>>>>> ebbf022 (feat: complete Agent ReAct architecture)
     """,
     version="3.0.0",
     docs_url="/docs",
     redoc_url="/redoc",
 )
 
-<<<<<<< HEAD
+
 =======
 
 # ============================================================
 # CORS
 # ============================================================
 
->>>>>>> ebbf022 (feat: complete Agent ReAct architecture)
+
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
@@ -204,7 +203,7 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-<<<<<<< HEAD
+
 # --- Routers (ANTES de estáticos) ---
 if health_router:
     app.include_router(health_router, prefix="/api/v1", tags=["Health"])
@@ -235,29 +234,27 @@ if langchain_router:
         "y /api/langchain/status"
     )
 
->>>>>>> ebbf022 (feat: complete Agent ReAct architecture)
 
 if analyzer_router:
     app.include_router(analyzer_router)
     logger.info("✓ analyzer_router en /api/v1/analyzer")
 
-<<<<<<< HEAD
+
 =======
 
->>>>>>> ebbf022 (feat: complete Agent ReAct architecture)
+
 if llm_router:
     app.include_router(llm_router)
     logger.info("✓ llm_router en /api/v1/llm")
 
-<<<<<<< HEAD
+
 =======
 
->>>>>>> ebbf022 (feat: complete Agent ReAct architecture)
 if chats_router:
     app.include_router(chats_router)
     logger.info("✓ chats_router en /api/v1/chats")
 
-<<<<<<< HEAD
+
 try:
     from app.api.routes_agent import router as agent_router
     app.include_router(agent_router, prefix="/api/v1")
@@ -913,4 +910,4 @@ async def on_shutdown():
         "🛑 Backend detenido"
     )
 
->>>>>>> ebbf022 (feat: complete Agent ReAct architecture)
+
