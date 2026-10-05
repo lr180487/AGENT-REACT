@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 'use strict';
 
 /**
@@ -183,3 +184,1289 @@ export function getActiveLocal() {
 if (typeof window !== 'undefined') {
   window.LLMConfig = { fetchLLMs, saveLLM, testLLM, activateLLM, deleteLLM, getActiveLocal, LLM_API };
 }
+=======
+/*
+ * ============================================================
+ * llm-config.js
+ * ============================================================
+ * AGENT-REACT
+ *
+ * Compatible con:
+ *
+ *   <script src="/llm-config.js"></script>
+ *
+ * NO requiere type="module".
+ *
+ * Expone:
+ *
+ *   window.LLMConfig
+ *
+ * API:
+ *
+ *   LLMConfig.fetchLLMs()
+ *   LLMConfig.saveLLM(payload)
+ *   LLMConfig.testLLM(payload)
+ *   LLMConfig.activateLLM(id)
+ *   LLMConfig.deleteLLM(id)
+ *   LLMConfig.getActiveLocal()
+ *   LLMConfig.getActiveId()
+ *   LLMConfig.clearLocal()
+ *
+ * Backend:
+ *
+ *   /api/v1/llm
+ *
+ * Seguridad:
+ *
+ * - NO guarda API keys reales en localStorage.
+ * - Solo conserva masked_key.
+ * - La API key debe permanecer en backend.
+ * ============================================================
+ */
+
+'use strict';
+
+
+// ============================================================
+// CONFIGURATION
+// ============================================================
+
+const LLM_API = '/api/v1/llm';
+
+const LS_KEY = 'llm_configs';
+
+const LS_ACTIVE = 'llm_active';
+
+
+// ============================================================
+// LOGGER
+// ============================================================
+
+const LOG_PREFIX =
+    '[LLMConfig]';
+
+
+function log(...args) {
+
+    console.log(
+        LOG_PREFIX,
+        ...args
+    );
+}
+
+
+function warn(...args) {
+
+    console.warn(
+        LOG_PREFIX,
+        ...args
+    );
+}
+
+
+function error(...args) {
+
+    console.error(
+        LOG_PREFIX,
+        ...args
+    );
+}
+
+
+// ============================================================
+// LOCAL STORAGE
+// ============================================================
+
+function lsGet(
+    key,
+    fallback = null
+) {
+
+    try {
+
+        const value =
+            localStorage.getItem(
+                key
+            );
+
+
+        if (
+            value === null ||
+            value === undefined ||
+            value === ''
+        ) {
+
+            return fallback;
+        }
+
+
+        return JSON.parse(
+            value
+        );
+
+    } catch (err) {
+
+        warn(
+            'localStorage read failed:',
+            key,
+            err
+        );
+
+
+        return fallback;
+    }
+}
+
+
+function lsSet(
+    key,
+    value
+) {
+
+    try {
+
+        localStorage.setItem(
+            key,
+            JSON.stringify(value)
+        );
+
+        return true;
+
+    } catch (err) {
+
+        warn(
+            'localStorage write failed:',
+            key,
+            err
+        );
+
+
+        return false;
+    }
+}
+
+
+function lsGetStr(key) {
+
+    try {
+
+        return localStorage.getItem(
+            key
+        );
+
+    } catch (_) {
+
+        return null;
+    }
+}
+
+
+function lsSetStr(
+    key,
+    value
+) {
+
+    try {
+
+        if (
+            value === null ||
+            value === undefined ||
+            value === ''
+        ) {
+
+            localStorage.removeItem(
+                key
+            );
+
+        } else {
+
+            localStorage.setItem(
+                key,
+                String(value)
+            );
+        }
+
+
+        return true;
+
+    } catch (err) {
+
+        warn(
+            'localStorage string write failed:',
+            key,
+            err
+        );
+
+
+        return false;
+    }
+}
+
+
+// ============================================================
+// SAFE JSON
+// ============================================================
+
+async function parseResponse(
+    response
+) {
+
+    if (
+        response.status ===
+        204
+    ) {
+
+        return null;
+    }
+
+
+    const text =
+        await response.text();
+
+
+    if (!text) {
+
+        return null;
+    }
+
+
+    try {
+
+        return JSON.parse(
+            text
+        );
+
+    } catch (_) {
+
+        return text;
+    }
+}
+
+
+// ============================================================
+// API FETCH
+// ============================================================
+
+async function apiFetch(
+    url,
+    options = {}
+) {
+
+    const config = {
+
+        method:
+            options.method ||
+            'GET',
+
+        ...options,
+
+        headers: {
+
+            Accept:
+                'application/json',
+
+            ...(options.body
+                ? {
+                    'Content-Type':
+                        'application/json'
+                }
+                : {}),
+
+            ...(options.headers || {})
+        }
+    };
+
+
+    let response;
+
+
+    try {
+
+        response =
+            await fetch(
+                url,
+                config
+            );
+
+    } catch (err) {
+
+        const networkError =
+            new Error(
+                `No se pudo conectar con el backend LLM: ${err.message}`
+            );
+
+
+        networkError.code =
+            'NETWORK_ERROR';
+
+
+        throw networkError;
+    }
+
+
+    const data =
+        await parseResponse(
+            response
+        );
+
+
+    if (!response.ok) {
+
+        let message =
+            `HTTP ${response.status}`;
+
+
+        if (
+            typeof data ===
+            'string' &&
+            data.trim()
+        ) {
+
+            message =
+                data;
+
+        } else if (
+            data?.detail
+        ) {
+
+            message =
+                typeof data.detail ===
+                'string'
+                    ? data.detail
+                    : JSON.stringify(
+                        data.detail
+                    );
+
+        } else if (
+            data?.message
+        ) {
+
+            message =
+                data.message;
+        }
+
+
+        const err =
+            new Error(
+                message
+            );
+
+
+        err.status =
+            response.status;
+
+
+        err.data =
+            data;
+
+
+        throw err;
+    }
+
+
+    return data;
+}
+
+
+// ============================================================
+// NORMALIZE LLM
+// ============================================================
+
+function normalizeLLM(
+    item
+) {
+
+    if (!item) {
+
+        return null;
+    }
+
+
+    return {
+
+        id:
+            item.id ||
+            item.llm_id ||
+            null,
+
+        provider:
+            item.provider ||
+            '',
+
+        name:
+            item.name ||
+            item.display_name ||
+            item.provider ||
+            'LLM',
+
+        model:
+            item.model ||
+            '',
+
+        base_url:
+            item.base_url ||
+            '',
+
+        temperature:
+            item.temperature ??
+            0.7,
+
+        max_tokens:
+            item.max_tokens ??
+            2048,
+
+        timeout:
+            item.timeout ??
+            30000,
+
+        masked_key:
+            item.masked_key ||
+            item.api_key_masked ||
+            '',
+
+        is_active:
+            Boolean(
+                item.is_active
+            )
+    };
+}
+
+
+// ============================================================
+// SAFE LOCAL RECORD
+// ============================================================
+//
+// IMPORTANTE:
+// Nunca guardar:
+//
+//   api_key
+//   authorization
+//   bearer token
+//   secret
+//
+// Solo metadata.
+//
+
+function toSafeLocal(
+    item
+) {
+
+    const normalized =
+        normalizeLLM(
+            item
+        );
+
+
+    if (!normalized) {
+
+        return null;
+    }
+
+
+    return {
+
+        id:
+            normalized.id,
+
+        provider:
+            normalized.provider,
+
+        name:
+            normalized.name,
+
+        model:
+            normalized.model,
+
+        base_url:
+            normalized.base_url,
+
+        temperature:
+            normalized.temperature,
+
+        max_tokens:
+            normalized.max_tokens,
+
+        timeout:
+            normalized.timeout,
+
+        masked_key:
+            normalized.masked_key,
+
+        is_active:
+            normalized.is_active
+    };
+}
+
+
+// ============================================================
+// SAVE SAFE LOCAL CONFIG
+// ============================================================
+
+function saveLocalConfig(
+    item
+) {
+
+    const safe =
+        toSafeLocal(
+            item
+        );
+
+
+    if (
+        !safe ||
+        !safe.id
+    ) {
+
+        return;
+    }
+
+
+    const list =
+        lsGet(
+            LS_KEY,
+            []
+        );
+
+
+    const index =
+        list.findIndex(
+            item =>
+                String(item.id) ===
+                String(safe.id)
+        );
+
+
+    if (index >= 0) {
+
+        list[index] =
+            {
+                ...list[index],
+                ...safe
+            };
+
+    } else {
+
+        list.push(
+            safe
+        );
+    }
+
+
+    lsSet(
+        LS_KEY,
+        list
+    );
+
+
+    if (
+        safe.is_active
+    ) {
+
+        lsSetStr(
+            LS_ACTIVE,
+            safe.id
+        );
+    }
+}
+
+
+// ============================================================
+// FETCH LLM CONFIGURATIONS
+// ============================================================
+
+async function fetchLLMs() {
+
+    try {
+
+        const response =
+            await apiFetch(
+                `${LLM_API}/config`
+            );
+
+
+        const list =
+            Array.isArray(response)
+
+                ? response
+
+                : (
+                    response?.items ||
+                    response?.configs ||
+                    response?.data ||
+                    []
+                );
+
+
+        const normalized =
+            list
+                .map(
+                    normalizeLLM
+                )
+                .filter(
+                    item =>
+                        item &&
+                        item.id
+                );
+
+
+        // Replace local metadata with backend state.
+        const safe =
+            normalized.map(
+                toSafeLocal
+            );
+
+
+        lsSet(
+            LS_KEY,
+            safe
+        );
+
+
+        const active =
+            normalized.find(
+                item =>
+                    item.is_active
+            );
+
+
+        if (active) {
+
+            lsSetStr(
+                LS_ACTIVE,
+                active.id
+            );
+        }
+
+
+        log(
+            'LLM configurations loaded:',
+            normalized.length
+        );
+
+
+        return normalized;
+
+    } catch (err) {
+
+        warn(
+            'Backend unavailable. Using local metadata.',
+            err.message
+        );
+
+
+        return lsGet(
+            LS_KEY,
+            []
+        );
+    }
+}
+
+
+// ============================================================
+// SAVE LLM
+// ============================================================
+
+async function saveLLM(
+    payload
+) {
+
+    if (!payload) {
+
+        throw new Error(
+            'Payload LLM requerido'
+        );
+    }
+
+
+    const provider =
+        String(
+            payload.provider ||
+            ''
+        ).trim();
+
+
+    const model =
+        String(
+            payload.model ||
+            ''
+        ).trim();
+
+
+    const apiKey =
+        String(
+            payload.api_key ||
+            ''
+        ).trim();
+
+
+    if (!provider) {
+
+        throw new Error(
+            'Provider requerido'
+        );
+    }
+
+
+    if (!model) {
+
+        throw new Error(
+            'Model requerido'
+        );
+    }
+
+
+    if (
+        apiKey &&
+        apiKey.length < 8
+    ) {
+
+        throw new Error(
+            'API Key inválida (mínimo 8 caracteres)'
+        );
+    }
+
+
+    /*
+     * La API key se envía SOLO al backend.
+     *
+     * NO se escribe en localStorage.
+     */
+
+    try {
+
+        const saved =
+            await apiFetch(
+                `${LLM_API}/config`,
+                {
+                    method:
+                        'POST',
+
+                    body:
+                        JSON.stringify(
+                            payload
+                        )
+                }
+            );
+
+
+        const normalized =
+            normalizeLLM(
+                saved
+            );
+
+
+        if (
+            normalized
+        ) {
+
+            saveLocalConfig(
+                normalized
+            );
+        }
+
+
+        log(
+            'LLM saved:',
+            normalized?.id
+        );
+
+
+        return saved;
+
+    } catch (err) {
+
+        /*
+         * NO hacemos fallback guardando
+         * la API key en localStorage.
+         */
+
+        error(
+            'No se pudo guardar LLM en backend:',
+            err
+        );
+
+
+        throw err;
+    }
+}
+
+
+// ============================================================
+// TEST LLM
+// ============================================================
+
+async function testLLM(
+    payload
+) {
+
+    if (!payload) {
+
+        throw new Error(
+            'Payload requerido'
+        );
+    }
+
+
+    return apiFetch(
+        `${LLM_API}/test`,
+        {
+            method:
+                'POST',
+
+            body:
+                JSON.stringify(
+                    payload
+                )
+        }
+    );
+}
+
+
+// ============================================================
+// ACTIVATE LLM
+// ============================================================
+
+async function activateLLM(
+    id
+) {
+
+    if (!id) {
+
+        throw new Error(
+            'id requerido'
+        );
+    }
+
+
+    try {
+
+        const response =
+            await apiFetch(
+                `${LLM_API}/config/${encodeURIComponent(id)}/activate`,
+                {
+                    method:
+                        'POST'
+                }
+            );
+
+
+        const local =
+            lsGet(
+                LS_KEY,
+                []
+            );
+
+
+        local.forEach(
+            item => {
+
+                item.is_active =
+                    String(item.id) ===
+                    String(id);
+            }
+        );
+
+
+        lsSet(
+            LS_KEY,
+            local
+        );
+
+
+        lsSetStr(
+            LS_ACTIVE,
+            id
+        );
+
+
+        return response;
+
+    } catch (err) {
+
+        /*
+         * Fallback solamente para metadata local.
+         */
+
+        warn(
+            'Backend activate failed:',
+            err.message
+        );
+
+
+        const local =
+            lsGet(
+                LS_KEY,
+                []
+            );
+
+
+        const exists =
+            local.some(
+                item =>
+                    String(item.id) ===
+                    String(id)
+            );
+
+
+        if (!exists) {
+
+            throw err;
+        }
+
+
+        local.forEach(
+            item => {
+
+                item.is_active =
+                    String(item.id) ===
+                    String(id);
+            }
+        );
+
+
+        lsSet(
+            LS_KEY,
+            local
+        );
+
+
+        lsSetStr(
+            LS_ACTIVE,
+            id
+        );
+
+
+        return {
+
+            id,
+
+            activated:
+                true,
+
+            local:
+                true
+        };
+    }
+}
+
+
+// ============================================================
+// DELETE LLM
+// ============================================================
+
+async function deleteLLM(
+    id
+) {
+
+    if (!id) {
+
+        throw new Error(
+            'id requerido'
+        );
+    }
+
+
+    try {
+
+        await apiFetch(
+            `${LLM_API}/config/${encodeURIComponent(id)}`,
+            {
+                method:
+                    'DELETE'
+            }
+        );
+
+    } catch (err) {
+
+        if (
+            err.status !==
+            404
+        ) {
+
+            throw err;
+        }
+    }
+
+
+    const local =
+        lsGet(
+            LS_KEY,
+            []
+        ).filter(
+            item =>
+                String(item.id) !==
+                String(id)
+        );
+
+
+    lsSet(
+        LS_KEY,
+        local
+    );
+
+
+    if (
+        String(
+            lsGetStr(
+                LS_ACTIVE
+            )
+        ) ===
+        String(id)
+    ) {
+
+        const next =
+            local.find(
+                item =>
+                    item.is_active
+            ) ||
+            local[0] ||
+            null;
+
+
+        lsSetStr(
+            LS_ACTIVE,
+            next?.id ||
+            null
+        );
+    }
+
+
+    return {
+
+        deleted:
+            id
+    };
+}
+
+
+// ============================================================
+// ACTIVE LLM
+// ============================================================
+
+function getActiveId() {
+
+    return lsGetStr(
+        LS_ACTIVE
+    );
+}
+
+
+function getActiveLocal() {
+
+    const activeId =
+        getActiveId();
+
+
+    const list =
+        lsGet(
+            LS_KEY,
+            []
+        );
+
+
+    return (
+        list.find(
+            item =>
+                String(item.id) ===
+                String(activeId)
+        ) ||
+        list.find(
+            item =>
+                item.is_active
+        ) ||
+        list[0] ||
+        null
+    );
+}
+
+
+// ============================================================
+// CLEAR LOCAL CACHE
+// ============================================================
+
+function clearLocal() {
+
+    try {
+
+        localStorage.removeItem(
+            LS_KEY
+        );
+
+        localStorage.removeItem(
+            LS_ACTIVE
+        );
+
+    } catch (_) {}
+
+
+    return {
+        cleared:
+            true
+    };
+}
+
+
+// ============================================================
+// PROVIDERS
+// ============================================================
+
+function getProviders() {
+
+    return [
+
+        {
+            id:
+                'openai',
+
+            name:
+                'OpenAI'
+        },
+
+        {
+            id:
+                'gemini',
+
+            name:
+                'Google Gemini'
+        },
+
+        {
+            id:
+                'openrouter',
+
+            name:
+                'OpenRouter'
+        },
+
+        {
+            id:
+                'ollama',
+
+            name:
+                'Ollama'
+        },
+
+        {
+            id:
+                'anthropic',
+
+            name:
+                'Anthropic'
+        }
+    ];
+}
+
+
+// ============================================================
+// HEALTH
+// ============================================================
+
+async function health() {
+
+    try {
+
+        return await apiFetch(
+            `${LLM_API}/health`
+        );
+
+    } catch (_) {
+
+        return {
+
+            status:
+                'offline'
+        };
+    }
+}
+
+
+// ============================================================
+// PUBLIC API
+// ============================================================
+
+const LLMConfig = {
+
+    LLM_API,
+
+    LS_KEY,
+
+    LS_ACTIVE,
+
+    fetchLLMs,
+
+    saveLLM,
+
+    testLLM,
+
+    activateLLM,
+
+    deleteLLM,
+
+    getActiveLocal,
+
+    getActiveId,
+
+    getProviders,
+
+    clearLocal,
+
+    health
+};
+
+
+// ============================================================
+// GLOBAL
+// ============================================================
+
+if (
+    typeof window !==
+    'undefined'
+) {
+
+    window.LLMConfig =
+        LLMConfig;
+
+    /*
+     * Compatibilidad con código
+     * existente.
+     */
+
+    window.fetchLLMs =
+        fetchLLMs;
+
+    window.saveLLM =
+        saveLLM;
+
+    window.testLLM =
+        testLLM;
+
+    window.activateLLM =
+        activateLLM;
+
+    window.deleteLLM =
+        deleteLLM;
+
+    window.getActiveLLM =
+        getActiveLocal;
+
+
+    log(
+        'Loaded successfully'
+    );
+}
+
+
+// ============================================================
+// COMMONJS / NODE OPTIONAL
+// ============================================================
+
+if (
+    typeof module !==
+    'undefined' &&
+    module.exports
+) {
+
+    module.exports =
+        LLMConfig;
+}
+>>>>>>> ebbf022 (feat: complete Agent ReAct architecture)
